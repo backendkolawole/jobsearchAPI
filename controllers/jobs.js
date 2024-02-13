@@ -6,13 +6,13 @@ const { NotFoundError } = require('../errors')
 const createJob = async (req, res) => {
     req.body.createdBy = req.user.userId
     const job = await Job.create(req.body)
-   res.status(StatusCodes.CREATED).json(job)
+    return res.status(StatusCodes.CREATED).json(job)
 }
 
 const getAllJobs = async (req, res)=> {
     const {userId} = req.user
     const job = await Job.find({createdBy: userId}).sort('createdAt')
-    res.status(StatusCodes.CREATED).json(job)
+    return res.status(StatusCodes.OK).json(job)
 }
 
 const getSingleJob = async (req, res) => {
@@ -52,7 +52,7 @@ const deleteJob = async (req, res)=> {
     if (!job) {
         throw new NotFoundError(`No job with id: ${id}`)
     }
-    res.status(StatusCodes.OK).send()
+    res.status(StatusCodes.NO_CONTENT).send()
 }
 
 

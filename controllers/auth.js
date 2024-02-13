@@ -4,6 +4,10 @@ const { BadRequestError, UnauthenticatedError } = require('../errors/index')
 const bcrypt = require('bcryptjs')
 
 const register = async (req, res)=> {
+    const {name, email, password} = req.body
+    if (!name || !email || !password) {
+        return res.status(400).json({msg: "Please provide username, email and password"})
+    }
     const user = await User.create(req.body)
     const token = await user.createJWT()
     res.status(StatusCodes.CREATED).json({user: {name: user.name}, token})
