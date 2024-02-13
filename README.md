@@ -42,6 +42,10 @@ Unlike the traditional server-side sessions — which save a session ID in memor
 
   - Set up the `MONGO_URI` variable equal to the DB connection string
   - Set up the `PORT` variable
+  - Set up the `JWT_SECRET` variable
+ 
+> [!NOTE]
+> `JWT_SECRET` is a string or buffer containing the secret key for verifying the token's signature.
 
 > [!IMPORTANT]
 > To avoid port collisions, in the source code, the port value is `3000`
@@ -52,7 +56,7 @@ Unlike the traditional server-side sessions — which save a session ID in memor
   
 ## Authentication Endpoints
 
-**POST [project_url]/auth/register**
+**POST [project_url]/api/v1/auth/register**
 
 Call this endpoint to sign up a new user. Use the authentication token in future calls to identify the user.
 
@@ -64,27 +68,30 @@ Call this endpoint to sign up a new user. Use the authentication token in future
 - Possible responses
 
 ```
-200 (OK)
+201 (CREATED)
 
 {
-  "msg": "User already exists. Please try logging in"
+    "user": {
+        "name": "example name"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWNiOWUxMjVlZWE5MDg1Njg2NmI1OGQiLCJuYW1lIjoiZXhhbXBsZSBuYW1lIiwiaWF0IjoxNzA3ODQzMDkwLCJleHAiOjE3MDg3MDcwOTB9.0_10uq1a5PwQ-FOl-mT4Ozu2yUPKVZ1eU1U2tpALq-s"
 }
 
 400 (Bad Request)
 
 {
-  "msg": "Please provide username and password"
+    "msg": "Duplicate value provided for email field. Please provide another value"
 }
 
-201 (CREATED)
+400 (Bad Request)
 
 {
-  "user": "username",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWM2NGNlN2FkYWJlYjk4Njk4ZGZhMTQiLCJ1c2VybmFtZSI6InVzZXJuYW1lIiwiaWF0IjoxNzA3NDk0NjMyfQ.35BE1hUYA2lY3z2JOn90emY064_B3wphSl-ULW02pvc"
+    "msg": "Please provide username, email and password"
 }
+
 ```
 
-**POST [project_url]/auth/login**
+**POST [project_url]/api/v1/auth/login**
 
 Call this endpoint to log a user in. Use the authentication token in future calls to identify the user.
 
@@ -98,21 +105,16 @@ Call this endpoint to log a user in. Use the authentication token in future call
 200 (OK)
 
 {
-    "user": "newuser1",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWM5ZTZlMmFmYTRiZDJlMjI3MGQxNWMiLCJ1c2VybmFtZSI6Im5ld3VzZXIxIiwiaWF0IjoxNzA3NzMxMTI1fQ.zXO66OjcuzE7-hG_iNOJm0khJ-YasGqxRPG9O3N3-80"
+    "user": {
+        "name": "example name"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWNiOWUxMjVlZWE5MDg1Njg2NmI1OGQiLCJuYW1lIjoiZXhhbXBsZSBuYW1lIiwiaWF0IjoxNzA3ODQzMjAxLCJleHAiOjE3MDg3MDcyMDF9.j9x2N9m6PcPCjskWXdcQpmzqJyX6vURGR0fJ23HXnAw"
 }
 
 401 (Unauthorized)
 
 {
-    "msg": "Please provide username and password"
-}
-
-404 (Not Found)
-
-{
-    "username": "jhdfhsdf",
-    "password": "password"
+  "msg": "Invalid credentials"
 }
 
 ```
@@ -127,49 +129,164 @@ Use the authentication token to identify the user.
 
 Call this endpoint to create a new job
 
-**POST [project_url]/jobs**
+**POST [project_url]/api/v1/jobs**
 
 - Possible responses
 
 ```
+200 (OK)
+
+{
+    "company": "example company",
+    "position": "co-owner",
+    "status": "pending",
+    "createdBy": "65cb9e125eea90856866b58d",
+    "_id": "65cb9f845eea90856866b595",
+    "createdAt": "2024-02-13T16:57:40.058Z",
+    "updatedAt": "2024-02-13T16:57:40.058Z",
+    "__v": 0
+}
+
+401 (Unauthorized)
+
+{
+    "msg": "Invalid credentials"
+}
 
 ```
 
 Call this endpoint to get all jobs by a user
 
-**GET [project_url]/jobs**
+**GET [project_url]/api/v1/jobs**
 
 - Possible responses
 
 ```
+200 (OK)
+
+[
+    {
+        "_id": "65cb9f845eea90856866b595",
+        "company": "apple",
+        "position": "backend developer",
+        "status": "pending",
+        "createdBy": "65cb9e125eea90856866b58d",
+        "createdAt": "2024-02-13T16:57:40.058Z",
+        "updatedAt": "2024-02-13T16:57:40.058Z",
+        "__v": 0
+    },
+    {
+        "_id": "65cb9fb85eea90856866b597",
+        "company": "radish company",
+        "position": "fullstack developer",
+        "status": "pending",
+        "createdBy": "65cb9e125eea90856866b58d",
+        "createdAt": "2024-02-13T16:58:32.567Z",
+        "updatedAt": "2024-02-13T16:58:32.567Z",
+        "__v": 0
+    }
+]
+
+401 (Unauthorized)
+
+{
+    "msg": "Invalid credentials"
+}
+
 ```
 
-Call this endpoint to get all jobs with a specific id
 
-**GET [project_url]/jobs/:id**
-
-- Possible responses
-
-```
-```
+**GET [project_url]/api/v1/jobs/:id**
 
 Call this endpoint to get a job with a specific id
 
-**PATCH [project_url]/jobs/:id**
+- Possible responses
+
+```
+200 (OK)
+
+{
+    "job": {
+        "_id": "65cb9f845eea90856866b595",
+        "company": "example company",
+        "position": "co-owner",
+        "status": "pending",
+        "createdBy": "65cb9e125eea90856866b58d",
+        "createdAt": "2024-02-13T16:57:40.058Z",
+        "updatedAt": "2024-02-13T16:57:40.058Z",
+        "__v": 0
+    }
+}
+
+401 (Unauthorized)
+
+{
+    "msg": "Invalid credentials"
+}
+
+404 (Not Found)
+
+{
+    "msg": "No job with id: 65cb9f845eea90856866b594"
+}
+
+```
+
+
+**PATCH [project_url]/api/v1/jobs/:id**
 
 - Possible responses
 
-  ```
-  ```
+```
+200 (OK)
+
+{
+      "_id": "65cb9f845eea90856866b595",
+      "company": "example company updated",
+      "position": "co-owner",
+      "status": "pending",
+      "createdBy": "65cb9e125eea90856866b58d",
+      "createdAt": "2024-02-13T16:57:40.058Z",
+      "updatedAt": "2024-02-13T16:57:40.058Z",
+      "__v": 0
+    
+}
+
+401 (Unauthorized)
+
+{
+    "msg": "Invalid credentials"
+}
+
+404 (Not Found)
+
+{
+    "msg": "No job with id: 65cb9f845eea90856866b594"
+}
+```
 
 Call this endpoint to delete a job with a specific id
 
-**DELETE [project_url]/jobs/:id**
+**DELETE [project_url]/api/v1/jobs/:id**
 
 - Possible responses
 
-  ```
-  ```
+```
+204 (No Content)
+
+
+401 (Unauthorized)
+
+{
+    "msg": "Invalid credentials"
+}
+
+404 (Not Found)
+
+{
+    "msg": "No job with id: 65cb9f845eea90856866b594"
+}
+```
   
 
 
