@@ -41,7 +41,7 @@ const updateJob = async (req, res) => {
         throw new NotFoundError(`No job with id: ${id}`)
     }
 
-    res.status(StatusCodes.OK).json(job)
+    return res.status(StatusCodes.OK).json(job)
 }
 
 const deleteJob = async (req, res)=> {
